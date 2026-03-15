@@ -16,10 +16,44 @@ st.markdown("""
 
     /* Style the title */
     .main .block-container h1:first-of-type {
-        font-size: 1.5rem;
+        font-size: 2rem;
         font-weight: 500;
         color: #202124;
         margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    /* Style the button to red */
+    .stButton > button {
+        background-color: #ee5f5b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+    }
+
+    .stButton > button:hover {
+        background-color: #d9534f;
+        border: none;
+    }
+
+    .stButton > button:active {
+        background-color: #c9302c;
+        border: none;
+    }
+
+    /* Style the text area */
+    .stTextArea textarea {
+        background-color: #ffffff;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+    }
+
+    .stTextArea textarea:focus {
+        border-color: #ee5f5b;
+        box-shadow: 0 0 0 1px #ee5f5b;
+        outline: none;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -220,14 +254,24 @@ if st.button("Send Request", type="primary"):
                                 total_tokens = input_tokens + output_tokens
                                 st.metric("Total Tokens", f"{total_tokens:,}")
 
-                            # Calculate approximate cost
+                            # Calculate approximate cost for LLM Proxy
                             # Assuming Claude pricing (adjust based on your actual model)
                             # Input: $3 per 1M tokens, Output: $15 per 1M tokens (Claude Sonnet 4 example)
                             input_cost = (input_tokens / 1_000_000) * 3.00
                             output_cost = (output_tokens / 1_000_000) * 15.00
                             total_cost = input_cost + output_cost
 
+                            # Calculate cost if using expensive GPT-4 Turbo directly
+                            # GPT-4 Turbo: Input: $10 per 1M tokens, Output: $30 per 1M tokens
+                            gpt4_input_cost = (input_tokens / 1_000_000) * 10.00
+                            gpt4_output_cost = (output_tokens / 1_000_000) * 30.00
+                            gpt4_total_cost = gpt4_input_cost + gpt4_output_cost
+
+                            # Calculate savings percentage
+                            savings_percent = ((gpt4_total_cost - total_cost) / gpt4_total_cost * 100) if gpt4_total_cost > 0 else 0
+
                             st.markdown(f"**Approximate Cost:** ${total_cost:.6f}")
+                            st.markdown(f"**Cost Savings:** {savings_percent:.1f}% vs GPT-4 Turbo")
                             st.caption("*Cost calculated based on standard pricing. Actual cost may vary.*")
 
                     except json.JSONDecodeError:
